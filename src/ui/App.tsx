@@ -21,26 +21,27 @@ export function App({ items, onChange }: Props) {
   const remove = (idx: number) => onChange(items.filter((_, i) => i !== idx));
 
   const duplicate = (idx: number) => {
-    const copy = { ...items[idx], name: items[idx].name + " (copy)"};
+    const copy = { ...items[idx], name: items[idx].name + " (copy)" };
     const next = [...items];
     next.splice(idx + 1, 0, copy);
     onChange(next);
   }
 
-  const setRequired = (idx: number, required: boolean) => {
-    // If required is turned off, force requiredCount back to 0
-    update(idx, { required, requiredCount: required ? items[idx].requiredCount : 0 });
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const moveItem = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0) return;
+
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+
+    onChange(next);
   }
-
-  const setRequiredCount = (idx: number, value: string) => {
-    // Clamp to 0+ and force integer
-    const n = Number(value);
-    const safe = Number.isFinite(n) ? Math.max(0, Math.trunc(n)) : 0;
-
-    update(idx, { requiredCount: safe });
-  }
-
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   // Filter (search categories)
   const [search, setSearch] = useState("");
@@ -70,7 +71,7 @@ export function App({ items, onChange }: Props) {
         </div>
         <div className="actions">
           <button className="btn" onClick={add}>+ Add</button>
-          <input className="search" placeholder="Search categories..." value={search} onChange={(e) => setSearch(e.target.value)}/>
+          <input className="search" placeholder="Search categories..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
@@ -88,13 +89,22 @@ export function App({ items, onChange }: Props) {
                 key={idx}
                 category={c}
                 index={idx}
-                update={update}
-                remove={remove}
                 duplicate={duplicate}
-                setRequired={setRequired}
-                setRequiredCount={setRequiredCount}
-                isOpen={openIndex === idx}
-                onToggle={() => setOpenIndex(openIndex === idx ? null : idx)}
+                onSelect={setSelectedIndex}
+                isSelected={selectedIndex === idx}
+                onDragStart={setDragIndex}
+                onDragOverItem={setDragOverIndex}
+                isDragOver={dragOverIndex === idx}
+                onDropItem={(toIndex) => {
+                  if (dragIndex === null) return;
+                  moveItem(dragIndex, toIndex);
+                  setDragIndex(null);
+                  setDragOverIndex(null);
+                }}
+                onDragEnd={() => {
+                   setDragIndex(null);
+                   setDragOverIndex(null);
+                }}
               />
             );
           })

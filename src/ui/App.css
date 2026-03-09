@@ -12,7 +12,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 18px;
 }
 
 .sectionHeader {
@@ -41,7 +41,10 @@
     font-weight: 600;
     font-size: 12px;
 }
-.btn:hover {background: #f9fafb;}
+
+.btn:hover {
+    background: #f9fafb;
+}
 
 .search {
     border: 1px solid #d1d5db;
@@ -50,6 +53,7 @@
     font-size: 12px;
     width: 200px;
 }
+
 .actions {
     display: flex;
     align-items: center;
@@ -86,50 +90,87 @@
 }
 
 .badge.notemplate {
-    background: "f3f4f6";
+    background: #f3f4f6;
 }
 
 /* Category Card */
-.dc-card {
+.dc-listItem {
+    position: relative;
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 12px;
-    background: white;
-}
-
-.dc-cardHeader {
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: #fff;
     display: flex;
     justify-content: space-between;
     gap: 8px;
-}
-
-.dc-inputName {
-    flex: 1;
-    padding: 8px;
-}
-
-.dc-cardGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.dc-requiredRow {
-    display: flex;
-    gap: 12px;
-    margin-top: 8px;
-}
-
-.dc-requiredInfo {
-    margin-top: 8px;
-    width: 100%;
-}
-
-.dc-expandBtn, .dc-duplicateBtn, .dc-deleteBtn {
-    border: 1px solid #ddd;
-    background: #fff;
-    padding: 6px 10px;
-    border-radius: 8px;
     cursor: pointer;
+    align-items: flex-start;
+}
+
+.dc-listItem.drag-over-line::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    top: -6px;
+    height: 3px;
+    border-radius: 999px;
+    background: #3b82f6;
+}
+
+.dc-listItem:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.dc-listItem.selected {
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.25);
+}
+
+.dc-dragHandle {
+    font-size: 16px;
+    color: #6b7280;
+    cursor: grab;
+    padding-top: 2px;
+    user-select: none;
+}
+
+.dc-listItem:active .dc-dragHandle {
+    cursor: grabbing;
+}
+
+.dc-listItemMain {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.dc-listItemTitle {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.dc-listItemSubtext {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.dc-listItemActions {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.dc-iconBtn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #f3eeee;
+    cursor: pointer;
+}
+.dc-iconBtn:hover {
+    background: rgb(215, 219, 224);
 }
