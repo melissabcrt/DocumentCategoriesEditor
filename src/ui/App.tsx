@@ -95,7 +95,9 @@ export function App({ items, onChange }: Props) {
 
     const next = [...items];
     const [moved] = next.splice(from, 1);
-    next.splice(to, 0, moved);
+
+    const adjustedTo = from < to ? to - 1 : to;
+    next.splice(adjustedTo, 0, moved);
 
     onChange(next);
   }
