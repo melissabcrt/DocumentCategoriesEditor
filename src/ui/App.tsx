@@ -4,6 +4,7 @@ import "./App.css";
 import { CategoryCard } from "./CategoryCard";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { DocumentCategory, emptyCategory } from "../types";
+import { GoTrash } from "react-icons/go";import { IoIosClose } from "react-icons/io";import { FaFolderTree } from "react-icons/fa6";
 
 interface Props {
   items: DocumentCategory[];
@@ -46,6 +47,11 @@ export function App({ items, onChange }: Props) {
 
   // Select a category and create a local editable copy
   const selectCategory = (idx: number) => {
+    if (selectedIndex === idx) {
+        setSelectedIndex(null);
+        setDraftCategory(null);
+      return;
+    } 
     setSelectedIndex(idx);
     setDraftCategory({ ...items[idx] });
   };
@@ -94,28 +100,36 @@ export function App({ items, onChange }: Props) {
     onChange(next);
   }
 
+  // If the editor is open use draftCategory, else use items
+  const visualItems = 
+    selectedIndex !== null && draftCategory
+      ? items.map((item, index) => (index === selectedIndex ? draftCategory : item))
+      : items;
+      
   // Filter (search categories)
   const [search, setSearch] = useState("");
-  const filteredItems = items.filter((c) => {
-    const q = search.toLowerCase().trim();
+  const filteredItems = visualItems
+    .map((category, index) => ({ category, index }))
+    .filter(({ category }) => {
+      const q = search.toLowerCase().trim();
 
-    if (!q) return true;
+      if (!q) return true;
 
-    return [
-      c.name,
-      c.subtext,
-      c.searchString,
-      c.namingConvention,
-      c.requiredInfo
-    ].some((value) => (value || "").toLowerCase().includes(q));
+      return [
+        category.name,
+        category.subtext,
+        category.searchString,
+        category.namingConvention,
+        category.requiredInfo
+      ].some((value) => (value || "").toLowerCase().includes(q));
   });
-
+  
   return (
     <div className="wrap">
       <div className="header">
         <div>
           <div className="sectionHeader">
-            <i className="bi bi-folder-fill"></i>
+            <FaFolderTree size={20}/>
             <div className="title">Upload Document Categories</div>
           </div>
           <div className="subtitle">List the established categories for this payment type.</div>
@@ -126,27 +140,25 @@ export function App({ items, onChange }: Props) {
         </div>
       </div>
 
-      <div className="content">
-        <div className="listPanel" style={{ display: "grid", gap: 10 }}>
+      <div className={`content ${draftCategory && selectedIndex !== null ? "editing" : ""}`}>
+        <div className="listPanel">
           {items.length === 0 ? (
             <div style={{ opacity: 0.7 }}>No categories yet.</div>
           ) : filteredItems.length === 0 ? (
             <div style={{ opacity: 0.7 }}>No matching categories.</div>
           ) : (
-            filteredItems.map((c) => {
-              const idx = items.indexOf(c);
-
+            filteredItems.map(({ category, index }) => {
               return (
                 <CategoryCard
-                  key={idx}
-                  category={c}
-                  index={idx}
+                  key={index}
+                  category={category}
+                  index={index}
                   duplicate={duplicate}
                   onSelect={selectCategory}
-                  isSelected={selectedIndex === idx}
+                  isSelected={selectedIndex === index}
                   onDragStart={setDragIndex}
                   onDragOverItem={setDragOverIndex}
-                  isDragOver={dragOverIndex === idx}
+                  isDragOver={dragOverIndex === index}
                   onDropItem={(toIndex) => {
                     if (dragIndex === null) return;
                     moveItem(dragIndex, toIndex);
@@ -176,11 +188,11 @@ export function App({ items, onChange }: Props) {
 
               <div className="dc-editorActions">
                 <button className="dc-iconBtn danger" onClick={deleteSelectedCategory} title="Delete Category">
-                  <i className="bi bi-trash3"></i>
+                  <GoTrash size={15}/>
                 </button>
 
                 <button className="dc-iconBtn" onClick={closeEditor} title="Close Editor">
-                  <i className="bi bi-x"></i>
+                  <IoIosClose size={20} />
                 </button>
               </div>
             </div>

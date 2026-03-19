@@ -54,7 +54,7 @@ export function parseCategories(raw: string | null | undefined): DocumentCategor
         templateUrl: toString(o.templateUrl),
         searchString: toString(o.searchString),
         required: toBool(o.required),
-        requiredCount: toNumber(o.requiredCount),
+        requiredCount: Math.max(1, toNumber(o.requiredCount)),
         requiredInfo: toString(o.requiredInfo),
       };
     });
@@ -64,5 +64,5 @@ export function parseCategories(raw: string | null | undefined): DocumentCategor
 }
 
 export function stringifyCategories(items: DocumentCategory[]): string {
-  return JSON.stringify(items, null, 2);
+  return JSON.stringify(items ?? [], null, 2);
 }

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { DocumentCategory } from "../types";
+import { MdDragIndicator } from "react-icons/md";import { IoDuplicateOutline } from "react-icons/io5";
 
 interface Props {
     category: DocumentCategory;
@@ -29,7 +30,7 @@ export function CategoryCard({ category, index, duplicate, onSelect, isSelected,
         onDragEnd={onDragEnd}>
 
         <div className="dc-dragHandle">
-            <i className="bi bi-grip-vertical"></i>
+            <MdDragIndicator size={18} />
         </div>
 
         <div className="dc-listItemMain">
@@ -52,7 +53,7 @@ export function CategoryCard({ category, index, duplicate, onSelect, isSelected,
         </div>
 
         <div className="dc-listItemActions" onClick={(e) => e.stopPropagation()}>
-            <button className="dc-iconBtn" onClick={() => duplicate(index)} title="Duplicate Category"><i className="bi bi-copy"></i></button>
+            <button className="dc-iconBtn" onClick={() => duplicate(index)} title="Duplicate Category"><IoDuplicateOutline size={15} /></button>
         </div>
 
     </div>

@@ -32,7 +32,7 @@ export class DocumentCategoriesEditor implements ComponentFramework.StandardCont
         this._container = container;
         this._notifyOutputChanged = notifyOutputChanged;
 
-        const raw = context.parameters.jsonValue.raw;
+        const raw = context.parameters.jsonValue.raw ?? "[]";
         this._items = parseCategories(raw);
         this._valueOut = stringifyCategories(this._items);
 
@@ -45,7 +45,7 @@ export class DocumentCategoriesEditor implements ComponentFramework.StandardCont
      */
     public updateView(context: ComponentFramework.Context<IInputs>): void {
         // If the record loads a different value (or changes externally), re-parse and re-render
-        const raw = context.parameters.jsonValue.raw;
+        const raw = context.parameters.jsonValue.raw ?? "[]";
         const next = parseCategories(raw);
         const nextStr = stringifyCategories(next);
 
@@ -77,8 +77,8 @@ export class DocumentCategoriesEditor implements ComponentFramework.StandardCont
         const onChange = (items: DocumentCategory[]) => {
             this._items = items;
             this._valueOut = stringifyCategories(items);
-            this._notifyOutputChanged();
             this.render();
+            this._notifyOutputChanged();
         };
 
         if (!this._root) {
