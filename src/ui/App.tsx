@@ -61,10 +61,24 @@ export function App({ items, onChange }: Props) {
     setDraftCategory((current) => (current ? { ...current, ...patch } : current));
   }
 
+  // Validate required fields
+  const valide = () => {
+    return items.every(item =>
+      item.name?.trim() &&
+      item.searchString?.trim() &&
+      item.namingConvention?.trim()
+    );
+  };
+
   // Save the draft into the main items array
   const saveDraft = () => {
     if (selectedIndex === null || !draftCategory) return;
 
+    if (!valide()) {
+      alert("Please fill all required fields");
+      return;
+    }
+    
     const next = items.map((item, idx) =>
       idx === selectedIndex ? draftCategory : item
     );
@@ -202,9 +216,9 @@ export function App({ items, onChange }: Props) {
             <div className="dc-editorBody">
 
               <div className="dc-field">
-                <label className="dc-label">Name</label>
+                <label className="dc-label">Name <span className="required">*</span></label>
                 <input 
-                  className="dc-input"
+                  className={`dc-input ${!draftCategory.name ? "error" : ""}`}
                   value={draftCategory.name}
                   onChange={(e) => updateDraft({ name: e.target.value })}
                   placeholder="Category name"/>
@@ -221,9 +235,9 @@ export function App({ items, onChange }: Props) {
 
               <div className="dc-twoCols">
                 <div className="dc-field">
-                  <label className="dc-label">Search String</label>
+                  <label className="dc-label">Search String <span className="required">*</span></label>
                   <input
-                    className="dc-input"
+                    className={`dc-input ${!draftCategory.searchString ? "error" : ""}`}
                     value={draftCategory.searchString}
                     onChange={(e) => updateDraft({ searchString: e.target.value })}
                     placeholder="Search string"/>
@@ -240,9 +254,9 @@ export function App({ items, onChange }: Props) {
               </div>
 
               <div className="dc-field">
-                <label className="dc-label">Naming Convention</label>
+                <label className="dc-label">Naming Convention <span className="required">*</span></label>
                 <input
-                  className="dc-input"
+                  className={`dc-input ${!draftCategory.namingConvention ? "error" : ""}`}
                   value={draftCategory.namingConvention}
                   onChange={(e) => updateDraft({ namingConvention: e.target.value })}
                   placeholder="ExhibitG1-{filename}-{date}-{timestamp}"/>

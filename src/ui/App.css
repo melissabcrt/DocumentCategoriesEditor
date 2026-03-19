@@ -161,6 +161,14 @@
     cursor: not-allowed;
 }
 
+.required {
+    color: red;
+}
+
+.dc-input.error {
+    border: 1px solid red !important;
+}
+
 .dc-textarea {
     resize: vertical;
     min-height: 70px;
