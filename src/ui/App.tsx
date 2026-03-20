@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "./App.css";
 import { CategoryCard } from "./CategoryCard";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -45,6 +45,9 @@ export function App({ items, onChange }: Props) {
   // Local draft used in the editor so changes are not applied inmediately
   const [draftCategory, setDraftCategory] = useState<DocumentCategory | null>(null);
 
+  // Reference to the naming convention input
+  const namingInputRef = useRef<HTMLInputElement>(null);
+
   // Select a category and create a local editable copy
   const selectCategory = (idx: number) => {
     if (selectedIndex === idx) {
@@ -60,6 +63,79 @@ export function App({ items, onChange }: Props) {
   const updateDraft = (patch: Partial<DocumentCategory>) => {
     setDraftCategory((current) => (current ? { ...current, ...patch } : current));
   }
+
+  // Tokens available for naming convention
+  const namingTokens = [
+    "{searchstring}",
+    "{filename}",
+    "{date}",
+    "{timestamp}",
+    "{category}"
+  ]
+
+  // Inserts a token into the naming convention input at cursor position
+  const insertToken = (token: string) => {
+    if (!draftCategory || selectedIndex === null) return;
+    
+    const input = namingInputRef.current;
+    if(!input) return;
+
+    const value = draftCategory.namingConvention || "";
+    
+    // Get cursor position
+    const start = input.selectionStart ?? value.length;
+    const end =  input.selectionEnd ?? value.length;
+
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+
+    // Determine if we need hyphens
+    const needsDashBefore =
+      before.length > 0 && !before.endsWith("-");
+
+    const needsDashAfter =
+      after.length > 0 && !after.startsWith("-");
+
+    const insert =
+      (needsDashBefore ? "-" : "") +
+      token +
+      (needsDashAfter ? "-" : "");
+
+    // Build new string
+    const newValue = before + insert + after;
+    
+    // Update draft
+    updateDraft({ namingConvention: newValue });
+
+    // Move cursor after inserted token
+    setTimeout(() => {
+      const cursorPos =
+        start +
+        (needsDashBefore ? 1 : 0) +
+        token.length;
+      
+        input.setSelectionRange(cursorPos, cursorPos);
+        input.focus();
+    }, 0);
+  };
+
+  // Builds a preview text for the naming convention
+  const buildNamingPreview = (value: string) => {
+    let result = value
+      .replace(/\{searchstring\}/g, "ExhibitB")
+      .replace(/\{filename\}/g, "invoice")
+      .replace(/\{date\}/g, "20260319")
+      .replace(/\{timestamp\}/g, "171234")
+      .replace(/\{category\}/g, "Travel");
+
+    // Remove any extra extension
+    result = result.replace(/\.(pdf|jpg|png|docx)$/i, "");
+    return result + ".pdf";
+  };
+
+  const namingPreview = draftCategory
+    ? buildNamingPreview(draftCategory.namingConvention || "")
+    : "";
 
   // Validate required fields
   const valide = () => {
@@ -78,7 +154,7 @@ export function App({ items, onChange }: Props) {
       alert("Please fill all required fields");
       return;
     }
-    
+
     const next = items.map((item, idx) =>
       idx === selectedIndex ? draftCategory : item
     );
@@ -256,10 +332,30 @@ export function App({ items, onChange }: Props) {
               <div className="dc-field">
                 <label className="dc-label">Naming Convention <span className="required">*</span></label>
                 <input
+                  ref={namingInputRef}
                   className={`dc-input ${!draftCategory.namingConvention ? "error" : ""}`}
                   value={draftCategory.namingConvention}
                   onChange={(e) => updateDraft({ namingConvention: e.target.value })}
                   placeholder="ExhibitG1-{filename}-{date}-{timestamp}"/>
+
+                <div className="dc-tokenRow">
+                  {namingTokens.map((token) => (
+                    <button
+                      key={token}
+                      type="button"
+                      className="dc-token"
+                      onClick={() => insertToken(token)}>
+                        {token.replace(/[{}]/g, "")}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="dc-helper">Click a token to insert it</div>
+
+                <div className="dc-previewBox">
+                  <span className="dc-previewLabel">Preview</span>
+                  <div className="dc-previewValue">{namingPreview || "—"}</div>
+                </div>
               </div>
 
               <div className="dc-twoCols">
@@ -276,7 +372,7 @@ export function App({ items, onChange }: Props) {
                     </label>
 
                     <span className="dc-helper">
-                      If ON, user must upload requiredCount file(s).
+                      If ON, user must upload <em>Required Count</em> number of files.
                     </span>
                   </div>
                 </div>
@@ -288,7 +384,22 @@ export function App({ items, onChange }: Props) {
                     className="dc-input"
                     value={draftCategory.requiredCount}
                     disabled={!draftCategory.required}
-                    onChange={(e) => updateDraft({ requiredCount: Number(e.target.value)})} min={1}/>
+                    min={0} max={100}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (value === "") {
+                        updateDraft({ requiredCount: 0 });
+                        return;
+                      }
+
+                      let num = Number(value);
+
+                      if (num > 100) num = 100;
+                      if (num < 0) num = 0;
+
+                      updateDraft({ requiredCount: num });
+                    }}/>
                 </div>
               </div>
 
