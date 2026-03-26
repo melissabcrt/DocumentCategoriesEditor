@@ -15,10 +15,8 @@ export function App({ items, onChange }: Props) {
   // Add a new empty category at the top of the list
   const add = () => {
     const newCategory = emptyCategory();
-    const next = [newCategory, ...items];
-
-    onChange(next);
-    setSelectedIndex(0);
+    
+    setSelectedIndex(-1);
     setDraftCategory({ ...newCategory });
   }
 
@@ -138,7 +136,7 @@ export function App({ items, onChange }: Props) {
     : "";
 
   // Validate required fields
-  const valide = () => {
+  const valid = () => {
     return items.every(item =>
       item.name?.trim() &&
       item.searchString?.trim() &&
@@ -150,14 +148,19 @@ export function App({ items, onChange }: Props) {
   const saveDraft = () => {
     if (selectedIndex === null || !draftCategory) return;
 
-    if (!valide()) {
+    if (!valid()) {
       alert("Please fill all required fields");
       return;
     }
 
-    const next = items.map((item, idx) =>
-      idx === selectedIndex ? draftCategory : item
-    );
+    let next: DocumentCategory[];
+
+    if (selectedIndex === -1) {
+      next = [draftCategory, ...items];
+    } else {
+      next = items.map((item, idx) =>
+      idx === selectedIndex ? draftCategory : item);
+    }
 
     onChange(next);
     setSelectedIndex(null);
@@ -174,7 +177,10 @@ export function App({ items, onChange }: Props) {
   const deleteSelectedCategory = () => {
     if (selectedIndex === null) return;
 
-    remove(selectedIndex);
+    if (selectedIndex !== -1) {
+      remove(selectedIndex);
+    }
+
     setSelectedIndex(null);
     setDraftCategory(null);
   }
@@ -194,7 +200,7 @@ export function App({ items, onChange }: Props) {
 
   // If the editor is open use draftCategory, else use items
   const visualItems = 
-    selectedIndex !== null && draftCategory
+    selectedIndex !== null && draftCategory && selectedIndex >= 0
       ? items.map((item, index) => (index === selectedIndex ? draftCategory : item))
       : items;
       
@@ -382,7 +388,7 @@ export function App({ items, onChange }: Props) {
                   <input
                     type="number"
                     className="dc-input"
-                    value={draftCategory.requiredCount}
+                    value={draftCategory.required ? draftCategory.requiredCount : 0}
                     disabled={!draftCategory.required}
                     min={0} max={100}
                     onChange={(e) => {
